@@ -16,17 +16,21 @@ root=Tk()
 root.title('2017课题')
 root.geometry('800x640+0+0')#窗口初始化
 
+#==============车辆控制参数=============================
+leftspeed=100
+rightspeed=100
+turnspeed=100
+
+
 
 #==============部件作用函数=============================
 def sent(Port,Value):
-    if Value<7:Value=7#避免temp不超过100串口数据无法发送
     temp=[]
-    c=(Value<<4)+Port
-    d=c%100
-    c=int(c/100)
+    c=(Value<<5)+Port
+    d=c%100+101
+    c=int(c/100)+1
     temp.append(c)
     temp.append(d)
-    temp.append(100)
     ser.write(temp)
     print(temp)
 
@@ -40,7 +44,10 @@ def Left():
 def Right():
     print('Right')
 def Stop():
+    sent(0,0)
+    sent(4,0)
     print('Stop')
+    
     BoxRec.insert(END,'Stop')
 def _Up(event):
     Up()
