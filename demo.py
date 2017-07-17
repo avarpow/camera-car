@@ -1,15 +1,10 @@
 from tkinter import *
 from tkinter import ttk
-import serial,time
-import serial.tools.list_ports  
-port_list = list(serial.tools.list_ports.comports())
-if len(port_list):
-    for i in port_list:
-        print(i[0])
-        print(i[1])
-    
-ser=serial.Serial('COM7')
-ser.timeout=0.01
+import serial,time,re
+import serial.tools.list_ports
+
+
+
 
 n=0
 root=Tk()
@@ -105,6 +100,16 @@ def YunFun4():
 
 
 def Send():
+    senttext=TextRec.get(0.0,END)
+    cle=0
+    try:
+        senttext=eval(senttext)
+        ser.write(senttext)
+        cle=1
+    except:
+        messagebox.showwarning(title='Error',message='Unknow input\n   未成功发送')
+    if int(clear.get())&cle:
+        TextRec.delete(0.0,END)
     print('send')
 def Seclect():
     print('Seclect')
@@ -112,9 +117,10 @@ def Baud():
     print('Baud')
     global n
     n=n+1
+    
     Bau.set(n)
 def Clear():
-    print(clear.get())
+    print(int(clear.get()))
 def ConStart():
     print('ConStart')
     root.after(1,_ConStart,root)
@@ -124,8 +130,11 @@ def _ConStart(widget):
         print(t)
         a=time.strftime('[%H:%M:%S]',time.localtime(time.time()))
         BoxRec.insert(END,a+t)
+        BoxRec.see(END)#接收后跳转到最后一行
     root.after(10,_ConStart,root)
-    
+
+def ClearRec():
+    BoxRec.delete(0,END)
     
 
 
@@ -191,124 +200,113 @@ ButYunStop.grid(row=1,column=1)
 FmData=LabelFrame(Fm1,text='传感器数据')
 
 #温度
-Label(FmData,text='温度').grid(row=0,column=0,sticky=E)
 
 Tpt=StringVar()
 Tpt.set(10.343)
 LabelTpt=Label(FmData,textvariable=Tpt)
-LabelTpt.grid(row=0,column=1,sticky=E)
-
-Label(FmData,text='℃').grid(row=0,column=2,sticky=W)
-
 
 #湿度
-Label(FmData,text='湿度').grid(row=1,column=0,sticky=E)
 
 Wet=StringVar()
 Wet.set(45678)
 LabelTpt=Label(FmData,textvariable=Wet)
-LabelTpt.grid(row=1,column=1,sticky=E)
-
-Label(FmData,text='％').grid(row=1,column=2,sticky=W)
 
 #经度
-Label(FmData,text='经度').grid(row=2,column=0,sticky=E)
 
 Lng=StringVar()
 Lng.set(132.324134)
 LabelLng=Label(FmData,textvariable=Lng)
-LabelLng.grid(row=2,column=1,sticky=E)
 
-Label(FmData,text='°E').grid(row=2,column=2,sticky=W)
 
 
 #纬度
-Label(FmData,text='纬度').grid(row=3,column=0,sticky=E)
 
 Lat=StringVar()
 Lat.set(132.324134)
 LabelLat=Label(FmData,textvariable=Lat)
-LabelLat.grid(row=3,column=1,sticky=E)
 
-Label(FmData,text='°N').grid(row=3,column=2,sticky=W)
 
 #可燃气体浓度
-Label(FmData,text='可燃气体').grid(row=4,column=0,sticky=E)
 
 Gas=StringVar()
 Gas.set(2384)
 LabelGas=Label(FmData,textvariable=Gas)
-LabelGas.grid(row=4,column=1,sticky=E)
 
-Label(FmData,text='ppm').grid(row=4,column=2,sticky=W)
-
-
-
-Label(FmData,text='速度').grid(row=5,column=0,sticky=E)
 
 CarSpeed=StringVar()
 CarSpeed.set(243)
 LabelCarSpeed=Label(FmData,textvariable=CarSpeed)
+
+
+#·······························
+Label(FmData,text='温度').grid(row=0,column=0,sticky=E)
+LabelTpt.grid(row=1,column=1,sticky=E)
+Label(FmData,text='％').grid(row=1,column=2,sticky=W)
+Label(FmData,text='经度').grid(row=2,column=0,sticky=E)
+LabelLng.grid(row=2,column=1,sticky=E)
+Label(FmData,text='°E').grid(row=2,column=2,sticky=W)
+Label(FmData,text='纬度').grid(row=3,column=0,sticky=E)
+LabelLat.grid(row=3,column=1,sticky=E)
+Label(FmData,text='°N').grid(row=3,column=2,sticky=W)
+Label(FmData,text='可燃气体').grid(row=4,column=0,sticky=E)
+LabelGas.grid(row=4,column=1,sticky=E)
+Label(FmData,text='ppm').grid(row=4,column=2,sticky=W)
+Label(FmData,text='速度').grid(row=5,column=0,sticky=E)
 LabelCarSpeed.grid(row=5,column=1,sticky=E)
-
 Label(FmData,text='单位待定').grid(row=5,column=2,sticky=W)
-
-
-
 
 #********串口设置*********
 FmOpt=LabelFrame(Fm1)
 Label00=Label(FmOpt,text='串口号')
-Label00.grid(row=0,column=0)
+
 
 
 Sec=StringVar()
 EntrySec=Entry(FmOpt,textvariable=Sec)
-EntrySec.grid(row=0,column=1)
 
 BtnSec=Button(FmOpt,text='连接',command=Seclect,height=1)
-BtnSec.grid(row=0,column=2)
 
 Label01=Label(FmOpt,text='波特率')
-Label01.grid(row=1,column=0)
-
 
 Bau=StringVar()
+Bau.set(9600)
 EntryBau=Entry(FmOpt,textvariable=Bau)
-EntryBau.grid(row=1,column=1)
 
 BtnBau=Button(FmOpt,text='设置',command=Baud,height=1)
+#····························
+Label00.grid(row=0,column=0)
+EntrySec.grid(row=0,column=1)
+BtnSec.grid(row=0,column=2)
+Label01.grid(row=1,column=0)
+EntryBau.grid(row=1,column=1)
 BtnBau.grid(row=1,column=2)
-
-
-
-
 
 #*************串口收发区**********88
 FmSer=Frame(root)
 
-
 scrollbar = Scrollbar(FmSer)
 BoxRec=Listbox(FmSer, yscrollcommand=scrollbar.set,height=20,width=48)
-BoxRec.grid(row=0,column=0,rowspan=2,sticky=W)
-
 scrollbar.config(command=BoxRec.yview,width=1)
-scrollbar.grid(row=0,column=1,rowspan=2,sticky=N+S+W)
+BtuStart=Button(FmSer,text='同步开始',command=ConStart,height=5,width=9,fg='red',font=("黑体",19, "bold"))
 
-BtuStart=Button(FmSer,text='同步开始',command=ConStart,height=7,width=10)
-BtuStart.grid(row=1,column=2)
-
+BtuCle=Button(FmSer,text='清屏',command=ClearRec,height=5,width=9,fg='blue',font=("黑体",19, "bold"))
 Rec=StringVar()
 Rec.set(45678)
 
 TextRec=Text(FmSer,height=10,width=50)
-TextRec.grid(row=2,column=0)
-
 BtuSend=Button(FmSer,text='发送',command=Send,height=7,width=10)
-BtuSend.grid(row=2,column=1)
 
 clear=StringVar()
+clear.set(1)
 Clear=Checkbutton(FmSer,text='发送后清空',command=Clear,variable=clear)
+
+#..................................................
+BoxRec.grid(row=0,column=0,rowspan=2,sticky=W)
+scrollbar.grid(row=0,column=1,rowspan=2,sticky=N+S+W)
+BtuCle.grid(row=0,column=1,columnspan=2,sticky=W+S)
+BtuStart.grid(row=1,column=1,columnspan=2,sticky=W+S)
+TextRec.grid(row=2,column=0)
+BtuSend.grid(row=2,column=1)
 Clear.grid(row=2,column=2)
 
 #=================按键绑定=================================
@@ -328,6 +326,22 @@ FmYun.grid(row=3,column=0)
 FmData.grid(row=1,column=0)
 Fm1.grid(row=0,column=0)
 FmSer.grid(row=0,column=1,rowspan=2)
+#===========================================================
+
+
+port_list = list(serial.tools.list_ports.comports())
+if len(port_list):
+    for i in port_list:
+        if re.findall('CH340',i[1]):
+                      d=i[0]
+                      Sec.set(d)
+                      
+        print(i[0])
+        print(i[1])
+    
+ser=serial.Serial(d)
+ser.timeout=0.01
+
 
 root.mainloop()
 
