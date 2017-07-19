@@ -4,7 +4,7 @@ def NewEncode(value,index):
     return [int(t/100)+1,(t%100)+101]
 def NewDecode(t):
     t=100*(t[0]-1)+t[1]-101
-    index=t&15
+    index=t&31
     value=t>>5
     return [value,index]
 while 1:

@@ -69,7 +69,7 @@ bool Is1100(int t){
 
   
 void Decode(int code){
-int Port=code&15;
+int Port=code&31;
 int Value=code>>5;
   Action(Port,Value);
   }
